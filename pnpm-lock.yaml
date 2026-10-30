@@ -14,9 +14,12 @@ importers:
       '@aws-sdk/s3-request-presigner':
         specifier: ^3.1160.0
         version: 3.1160.0
+      '@neondatabase/serverless':
+        specifier: ^1.2.0
+        version: 1.2.0
       '@payloadcms/db-postgres':
         specifier: 3.92.1
-        version: 3.92.1(payload@3.92.1(graphql@16.14.2)(typescript@5.7.3))
+        version: 3.92.1(@neondatabase/serverless@1.2.0)(payload@3.92.1(graphql@16.14.2)(typescript@5.7.3))
       '@payloadcms/email-resend':
         specifier: 3.92.1
         version: 3.92.1(payload@3.92.1(graphql@16.14.2)(typescript@5.7.3))
@@ -1406,6 +1409,10 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1 || 2.0.0-beta.2
       '@emnapi/runtime': ^1.7.1 || 2.0.0-beta.2
+
+  '@neondatabase/serverless@1.2.0':
+    resolution: {integrity: sha512-tnaqgixUengZQNd9ZrS3ytQfamJzLKY8QxgqWQTNHHtB+KrFQWk77JTbbpg4RD+J3qE4eO2lVytvGDX5Kj6FdQ==}
+    engines: {node: '>=19.0.0'}
 
   '@next/env@15.5.28':
     resolution: {integrity: sha512-xxW5EBI8fMPuVTPBW7LL980IRbuDXlbkUAwp9DDhtb4Lnich3nJ13uYpvrX4VE74hWPf6AvHHAMmGCidcHjbfg==}
@@ -5922,6 +5929,8 @@ snapshots:
       '@tybys/wasm-util': 0.10.4
     optional: true
 
+  '@neondatabase/serverless@1.2.0': {}
+
   '@next/env@15.5.28': {}
 
   '@next/env@16.3.3': {}
@@ -5971,13 +5980,13 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@payloadcms/db-postgres@3.92.1(payload@3.92.1(graphql@16.14.2)(typescript@5.7.3))':
+  '@payloadcms/db-postgres@3.92.1(@neondatabase/serverless@1.2.0)(payload@3.92.1(graphql@16.14.2)(typescript@5.7.3))':
     dependencies:
-      '@payloadcms/drizzle': 3.92.1(@types/pg@8.20.0)(payload@3.92.1(graphql@16.14.2)(typescript@5.7.3))(pg@8.20.0)
+      '@payloadcms/drizzle': 3.92.1(@neondatabase/serverless@1.2.0)(@types/pg@8.20.0)(payload@3.92.1(graphql@16.14.2)(typescript@5.7.3))(pg@8.20.0)
       '@types/pg': 8.20.0
       console-table-printer: 2.12.1
       drizzle-kit: 0.31.7
-      drizzle-orm: 0.45.2(@types/pg@8.20.0)(pg@8.20.0)
+      drizzle-orm: 0.45.2(@neondatabase/serverless@1.2.0)(@types/pg@8.20.0)(pg@8.20.0)
       payload: 3.92.1(graphql@16.14.2)(typescript@5.7.3)
       pg: 8.20.0
       prompts: 2.4.2
@@ -6014,11 +6023,11 @@ snapshots:
       - sqlite3
       - supports-color
 
-  '@payloadcms/drizzle@3.92.1(@types/pg@8.20.0)(payload@3.92.1(graphql@16.14.2)(typescript@5.7.3))(pg@8.20.0)':
+  '@payloadcms/drizzle@3.92.1(@neondatabase/serverless@1.2.0)(@types/pg@8.20.0)(payload@3.92.1(graphql@16.14.2)(typescript@5.7.3))(pg@8.20.0)':
     dependencies:
       console-table-printer: 2.12.1
       dequal: 2.0.3
-      drizzle-orm: 0.45.2(@types/pg@8.20.0)(pg@8.20.0)
+      drizzle-orm: 0.45.2(@neondatabase/serverless@1.2.0)(@types/pg@8.20.0)(pg@8.20.0)
       payload: 3.92.1(graphql@16.14.2)(typescript@5.7.3)
       prompts: 2.4.2
       to-snake-case: 1.0.0
@@ -7169,8 +7178,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.45.2(@types/pg@8.20.0)(pg@8.20.0):
+  drizzle-orm@0.45.2(@neondatabase/serverless@1.2.0)(@types/pg@8.20.0)(pg@8.20.0):
     optionalDependencies:
+      '@neondatabase/serverless': 1.2.0
       '@types/pg': 8.20.0
       pg: 8.20.0
 
