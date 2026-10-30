@@ -1,12 +1,15 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { PhotoView } from '@/lib/photo-view'
+import { DownloadIcon, HeartIcon, PlayIcon, ShareIcon } from './icons'
 import { PhotoGrid } from './PhotoGrid'
 
 type Props = {
   slug: string
+  title: string
+  siteName: string
   photos: PhotoView[]
   allowDownloads: boolean
   allowFavorites: boolean
@@ -14,28 +17,17 @@ type Props = {
 
 const emailKey = 'gallery-email'
 
-function Heart({ filled }: { filled: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.6}>
-      <path d="M12 20.5s-7.5-4.6-9.3-9.3C1.4 7.8 3.6 4.5 7 4.5c2 0 3.5 1.1 5 3 1.5-1.9 3-3 5-3 3.4 0 5.6 3.3 4.3 6.7-1.8 4.7-9.3 9.3-9.3 9.3z" />
-    </svg>
-  )
-}
-
-function DownloadIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.6}>
-      <path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" />
-    </svg>
-  )
-}
-
-export function GalleryView({ slug, photos, allowDownloads, allowFavorites }: Props) {
+export function GalleryView({ slug, title, siteName, photos, allowDownloads, allowFavorites }: Props) {
   const [email, setEmail] = useState<string | null>(null)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [onlyFavorites, setOnlyFavorites] = useState(false)
   const [askEmailFor, setAskEmailFor] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [index, setIndex] = useState(-1)
+  const [autoplay, setAutoplay] = useState(false)
+  const [downloadMenu, setDownloadMenu] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const loadFavorites = useCallback(
     async (value: string) => {
@@ -62,6 +54,42 @@ export function GalleryView({ slug, photos, allowDownloads, allowFavorites }: Pr
       cancelled = true
     }
   }, [allowFavorites, slug])
+
+  const visible = useMemo(
+    () => (onlyFavorites ? photos.filter((photo) => favorites.has(photo.id)) : photos),
+    [onlyFavorites, photos, favorites],
+  )
+
+  // Shared photo links (#foto-<id>) open that photo in the lightbox.
+  useEffect(() => {
+    const match = /^#foto-(\d+)$/.exec(window.location.hash)
+    if (!match) return
+    const target = photos.findIndex((photo) => photo.id === Number(match[1]))
+    if (target < 0) return
+    const frame = requestAnimationFrame(() => setIndex(target))
+    return () => cancelAnimationFrame(frame)
+  }, [photos])
+
+  const notify = (message: string) => {
+    clearTimeout(toastTimer.current)
+    setToast(message)
+    toastTimer.current = setTimeout(() => setToast(null), 2500)
+  }
+
+  const share = async (url: string) => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url })
+      } catch {
+        // dismissed by the user
+      }
+      return
+    }
+    await navigator.clipboard.writeText(url)
+    notify('Enlace copiado')
+  }
+
+  const galleryURL = () => `${window.location.origin}/g/${slug}`
 
   const toggle = useCallback(
     async (photoId: number, withEmail = email) => {
@@ -103,92 +131,164 @@ export function GalleryView({ slug, photos, allowDownloads, allowFavorites }: Pr
     if (pending !== null) await toggle(pending, value)
   }
 
-  const visible = useMemo(
-    () => (onlyFavorites ? photos.filter((photo) => favorites.has(photo.id)) : photos),
-    [onlyFavorites, photos, favorites],
-  )
+  const changeIndex = (i: number) => {
+    // Closing the lightbox ends the slideshow; a later click opens it paused.
+    if (i < 0) setAutoplay(false)
+    setIndex(i)
+  }
 
-  const heartButton = (photo: PhotoView, className: string) => (
-    <button
-      type="button"
-      onClick={() => toggle(photo.id)}
-      className={className}
-      aria-pressed={favorites.has(photo.id)}
-      aria-label={favorites.has(photo.id) ? 'Quitar de favoritos' : 'Añadir a favoritos'}
-    >
-      <Heart filled={favorites.has(photo.id)} />
-    </button>
-  )
+  const startSlideshow = () => {
+    if (visible.length === 0) return
+    setAutoplay(true)
+    setIndex(0)
+  }
+
+  const canDownloadFavorites = allowDownloads && allowFavorites && email && favorites.size > 0
+  const overlayButton = 'flex h-9 w-9 items-center justify-center text-white transition-transform hover:scale-110'
 
   return (
     <div>
-      <div className="sticky top-0 z-10 mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-line bg-paper/95 py-4 backdrop-blur">
-        <p className="eyebrow">{photos.length} fotos</p>
-        <div className="flex flex-wrap items-center gap-3">
+      <div className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/95 px-4 py-3 backdrop-blur md:px-6">
+        <div className="min-w-0">
+          <p className="truncate font-display text-lg tracking-wide">{title}</p>
+          <p className="text-[10px] tracking-[0.2em] text-muted uppercase">{siteName}</p>
+        </div>
+        <div className="flex shrink-0 items-center">
           {allowFavorites && (
             <button
               type="button"
               onClick={() => setOnlyFavorites((v) => !v)}
-              className={`btn !px-4 !py-2 ${onlyFavorites ? 'bg-ink text-paper' : ''}`}
+              className="icon-btn relative"
+              aria-pressed={onlyFavorites}
+              aria-label={onlyFavorites ? 'Ver todas las fotos' : `Ver favoritas (${favorites.size})`}
+              title={onlyFavorites ? 'Ver todas' : 'Ver favoritas'}
             >
-              <Heart filled={onlyFavorites} /> Favoritas ({favorites.size})
+              <HeartIcon filled={onlyFavorites} />
+              {favorites.size > 0 && (
+                <span className="absolute top-1 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[9px] text-white">
+                  {favorites.size}
+                </span>
+              )}
             </button>
           )}
-          {allowDownloads && allowFavorites && email && favorites.size > 0 && (
-            <a href={`/g/${slug}/descargar?email=${encodeURIComponent(email)}`} className="btn !px-4 !py-2">
-              <DownloadIcon /> Descargar favoritas
-            </a>
-          )}
           {allowDownloads && (
-            <a href={`/g/${slug}/descargar`} className="btn !px-4 !py-2">
-              <DownloadIcon /> Descargar todo
-            </a>
-          )}
-        </div>
-      </div>
-
-      {error && <p className="mb-4 text-center text-sm text-red-700">{error}</p>}
-
-      {visible.length === 0 ? (
-        <p className="py-20 text-center text-muted">Aún no has marcado ninguna foto como favorita.</p>
-      ) : (
-        <PhotoGrid
-          photos={visible}
-          renderOverlay={(photo) => (
-            <div className="absolute right-2 bottom-2 flex gap-1 text-white opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
-              {allowFavorites &&
-                heartButton(photo, `rounded-full bg-black/35 p-2 backdrop-blur hover:bg-black/55 ${favorites.has(photo.id) ? 'text-red-300' : ''}`)}
-              {photo.download && (
-                <a href={photo.download} className="rounded-full bg-black/35 p-2 backdrop-blur hover:bg-black/55" aria-label="Descargar foto">
+            <div className="relative">
+              {canDownloadFavorites ? (
+                <button type="button" onClick={() => setDownloadMenu((v) => !v)} className="icon-btn" aria-label="Descargar" aria-expanded={downloadMenu} title="Descargar">
+                  <DownloadIcon />
+                </button>
+              ) : (
+                <a href={`/g/${slug}/descargar`} className="icon-btn" aria-label="Descargar todas las fotos" title="Descargar todas">
                   <DownloadIcon />
                 </a>
               )}
+              {downloadMenu && canDownloadFavorites && (
+                <div className="absolute right-0 mt-2 w-56 border border-line bg-white py-2 text-sm shadow-lg" onMouseLeave={() => setDownloadMenu(false)}>
+                  <a href={`/g/${slug}/descargar`} className="block px-4 py-2 hover:bg-line/50" onClick={() => setDownloadMenu(false)}>
+                    Todas las fotos ({photos.length})
+                  </a>
+                  <a
+                    href={`/g/${slug}/descargar?email=${encodeURIComponent(email!)}`}
+                    className="block px-4 py-2 hover:bg-line/50"
+                    onClick={() => setDownloadMenu(false)}
+                  >
+                    Mis favoritas ({favorites.size})
+                  </a>
+                </div>
+              )}
             </div>
           )}
-          renderToolbar={
-            allowFavorites
-              ? (photo) => heartButton(photo, `yarl__button ${favorites.has(photo.id) ? 'text-red-300' : ''}`)
-              : undefined
-          }
-        />
-      )}
+          <button type="button" onClick={() => share(galleryURL())} className="icon-btn" aria-label="Compartir galería" title="Compartir">
+            <ShareIcon />
+          </button>
+          <button type="button" onClick={startSlideshow} className="icon-btn" aria-label="Ver presentación" title="Presentación">
+            <PlayIcon />
+          </button>
+        </div>
+      </div>
+
+      {error && <p className="py-2 text-center text-sm text-red-700">{error}</p>}
+
+      <div className="px-1.5 pt-1.5 md:px-4">
+        {visible.length === 0 ? (
+          <p className="py-24 text-center text-muted">Aún no has marcado ninguna foto como favorita.</p>
+        ) : (
+          <PhotoGrid
+            photos={visible}
+            index={index}
+            onIndexChange={changeIndex}
+            autoplay={autoplay}
+            renderOverlay={(photo) => {
+              const favorite = favorites.has(photo.id)
+              return (
+                <>
+                  {favorite && (
+                    <span className="pointer-events-none absolute top-2 right-2 text-white drop-shadow md:group-hover:opacity-0">
+                      <HeartIcon filled className="h-4 w-4" />
+                    </span>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 flex justify-end gap-1 bg-gradient-to-t from-black/35 to-transparent px-1 pt-6 pb-0.5 md:from-black/45 md:px-2 md:pt-8 md:pb-1.5 opacity-100 transition-opacity duration-300 md:opacity-0 md:group-hover:opacity-100">
+                    {allowFavorites && (
+                      <button
+                        type="button"
+                        onClick={() => toggle(photo.id)}
+                        className={overlayButton}
+                        aria-pressed={favorite}
+                        aria-label={favorite ? 'Quitar de favoritas' : 'Añadir a favoritas'}
+                      >
+                        <HeartIcon filled={favorite} />
+                      </button>
+                    )}
+                    {photo.download && (
+                      <a href={photo.download} className={`${overlayButton} max-md:hidden`} aria-label="Descargar foto">
+                        <DownloadIcon />
+                      </a>
+                    )}
+                    <button type="button" onClick={() => share(`${galleryURL()}#foto-${photo.id}`)} className={`${overlayButton} max-md:hidden`} aria-label="Compartir foto">
+                      <ShareIcon />
+                    </button>
+                  </div>
+                </>
+              )
+            }}
+            renderToolbar={
+              allowFavorites
+                ? (photo) => (
+                    <button
+                      type="button"
+                      onClick={() => toggle(photo.id)}
+                      className="yarl__button"
+                      aria-pressed={favorites.has(photo.id)}
+                      aria-label={favorites.has(photo.id) ? 'Quitar de favoritas' : 'Añadir a favoritas'}
+                    >
+                      <HeartIcon filled={favorites.has(photo.id)} className="h-7 w-7" />
+                    </button>
+                  )
+                : undefined
+            }
+          />
+        )}
+      </div>
 
       {askEmailFor !== null && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 p-6" onClick={() => setAskEmailFor(null)}>
-          <form
-            action={submitEmail}
-            onClick={(event) => event.stopPropagation()}
-            className="w-full max-w-sm bg-paper p-8 text-center shadow-2xl"
-          >
-            <p className="font-serif text-2xl">Guarda tus favoritas</p>
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-6" onClick={() => setAskEmailFor(null)}>
+          <form action={submitEmail} onClick={(event) => event.stopPropagation()} className="w-full max-w-sm bg-white p-8 text-center shadow-2xl">
+            <p className="heading text-base">Guarda tus favoritas</p>
             <p className="mt-3 text-sm text-muted">Escribe tu email para guardar tu selección y verla desde cualquier dispositivo.</p>
             <input name="email" type="email" required autoFocus placeholder="tu@email.com" className="field mt-6 text-center" />
-            <button type="submit" className="btn mt-8 w-full">
+            <button type="submit" className="btn mt-8 w-full bg-ink text-paper hover:bg-ink/85">
               Continuar
             </button>
           </form>
         </div>
       )}
+
+      <div
+        role="status"
+        className={`fixed bottom-6 left-1/2 z-[10001] -translate-x-1/2 bg-ink px-5 py-2.5 text-sm text-white transition-opacity duration-300 ${toast ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+      >
+        {toast}
+      </div>
     </div>
   )
 }

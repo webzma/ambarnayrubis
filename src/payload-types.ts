@@ -67,12 +67,10 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    albums: Album;
-    media: Media;
     galleries: Gallery;
     'client-photos': ClientPhoto;
     selections: Selection;
-    inquiries: Inquiry;
+    media: Media;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -85,12 +83,10 @@ export interface Config {
     };
   };
   collectionsSelect: {
-    albums: AlbumsSelect<false> | AlbumsSelect<true>;
-    media: MediaSelect<false> | MediaSelect<true>;
     galleries: GalleriesSelect<false> | GalleriesSelect<true>;
     'client-photos': ClientPhotosSelect<false> | ClientPhotosSelect<true>;
     selections: SelectionsSelect<false> | SelectionsSelect<true>;
-    inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -137,85 +133,6 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "albums".
- */
-export interface Album {
-  id: number;
-  title: string;
-  /**
-   * Se genera automáticamente a partir del título si lo dejas vacío.
-   */
-  slug?: string | null;
-  category?: ('bodas' | 'retratos' | 'familias' | 'eventos' | 'maternidad' | 'comercial') | null;
-  description?: string | null;
-  cover: number | Media;
-  /**
-   * Arrastra varias fotos a la vez para subirlas en lote.
-   */
-  photos?: (number | Media)[] | null;
-  published?: boolean | null;
-  featured?: boolean | null;
-  /**
-   * Menor número = aparece primero.
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Fotos visibles para todo el mundo (portafolio, portada, sobre mí).
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  /**
-   * Describe la foto (SEO y accesibilidad).
-   */
-  alt?: string | null;
-  prefix?: string | null;
-  _objectKey?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    card?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "galleries".
  */
 export interface Gallery {
@@ -237,6 +154,14 @@ export interface Gallery {
    * Arrastra todas las fotos de la sesión para subirlas en lote.
    */
   photos?: (number | ClientPhoto)[] | null;
+  /**
+   * Ej. Vintaje. Se muestran como filtros en la página principal.
+   */
+  tags?: string[] | null;
+  /**
+   * Si tiene contraseña, se verá la portada con un candado y las fotos seguirán protegidas.
+   */
+  listed?: boolean | null;
   status?: ('active' | 'archived') | null;
   allowDownloads?: boolean | null;
   allowFavorites?: boolean | null;
@@ -314,19 +239,56 @@ export interface Selection {
   createdAt: string;
 }
 /**
+ * Fotos visibles para todo el mundo (portafolio, portada, sobre mí).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "inquiries".
+ * via the `definition` "media".
  */
-export interface Inquiry {
+export interface Media {
   id: number;
-  name: string;
-  email: string;
-  phone?: string | null;
-  eventType?: string | null;
-  eventDate?: string | null;
-  message: string;
+  /**
+   * Describe la foto (SEO y accesibilidad).
+   */
+  alt?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -380,14 +342,6 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'albums';
-        value: number | Album;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: number | Media;
-      } | null)
-    | ({
         relationTo: 'galleries';
         value: number | Gallery;
       } | null)
@@ -400,8 +354,8 @@ export interface PayloadLockedDocument {
         value: number | Selection;
       } | null)
     | ({
-        relationTo: 'inquiries';
-        value: number | Inquiry;
+        relationTo: 'media';
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -451,77 +405,6 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "albums_select".
- */
-export interface AlbumsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  category?: T;
-  description?: T;
-  cover?: T;
-  photos?: T;
-  published?: T;
-  featured?: T;
-  order?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  prefix?: T;
-  _objectKey?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        card?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        large?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "galleries_select".
  */
 export interface GalleriesSelect<T extends boolean = true> {
@@ -533,6 +416,8 @@ export interface GalleriesSelect<T extends boolean = true> {
   password?: T;
   cover?: T;
   photos?: T;
+  tags?: T;
+  listed?: T;
   status?: T;
   allowDownloads?: T;
   allowFavorites?: T;
@@ -608,17 +493,57 @@ export interface SelectionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "inquiries_select".
+ * via the `definition` "media_select".
  */
-export interface InquiriesSelect<T extends boolean = true> {
-  name?: T;
-  email?: T;
-  phone?: T;
-  eventType?: T;
-  eventDate?: T;
-  message?: T;
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        large?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -691,23 +616,20 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface SiteSetting {
   id: number;
   siteName: string;
-  tagline?: string | null;
-  description?: string | null;
+  /**
+   * Se muestra pequeña y cuadrada encima del nombre.
+   */
   logo?: (number | null) | Media;
   /**
-   * Se muestran en un carrusel a pantalla completa.
+   * Texto bajo el nombre en la página principal. Respeta los saltos de línea.
    */
-  heroImages?: (number | Media)[] | null;
-  aboutTitle?: string | null;
-  aboutText?: string | null;
-  aboutImage?: (number | null) | Media;
+  intro?: string | null;
   email?: string | null;
-  phone?: string | null;
-  whatsapp?: string | null;
-  location?: string | null;
-  instagram?: string | null;
   facebook?: string | null;
+  instagram?: string | null;
   tiktok?: string | null;
+  tagline?: string | null;
+  description?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -717,20 +639,14 @@ export interface SiteSetting {
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
   siteName?: T;
+  logo?: T;
+  intro?: T;
+  email?: T;
+  facebook?: T;
+  instagram?: T;
+  tiktok?: T;
   tagline?: T;
   description?: T;
-  logo?: T;
-  heroImages?: T;
-  aboutTitle?: T;
-  aboutText?: T;
-  aboutImage?: T;
-  email?: T;
-  phone?: T;
-  whatsapp?: T;
-  location?: T;
-  instagram?: T;
-  facebook?: T;
-  tiktok?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

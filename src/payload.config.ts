@@ -8,10 +8,8 @@ import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
-import { Albums } from './collections/Albums'
 import { ClientPhotos } from './collections/ClientPhotos'
 import { Galleries } from './collections/Galleries'
-import { Inquiries } from './collections/Inquiries'
 import { Media } from './collections/Media'
 import { Selections } from './collections/Selections'
 import { Users } from './collections/Users'
@@ -40,7 +38,7 @@ export default buildConfig({
     supportedLanguages: { es },
     fallbackLanguage: 'es',
   },
-  collections: [Albums, Media, Galleries, ClientPhotos, Selections, Inquiries, Users],
+  collections: [Galleries, ClientPhotos, Selections, Media, Users],
   globals: [SiteSettings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

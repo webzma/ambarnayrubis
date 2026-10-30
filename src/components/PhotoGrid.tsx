@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import Lightbox from 'yet-another-react-lightbox'
 import Counter from 'yet-another-react-lightbox/plugins/counter'
 import Download from 'yet-another-react-lightbox/plugins/download'
 import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen'
+import Slideshow from 'yet-another-react-lightbox/plugins/slideshow'
 import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 import 'yet-another-react-lightbox/plugins/counter.css'
 import 'yet-another-react-lightbox/styles.css'
@@ -14,31 +15,27 @@ import { Photo } from './Photo'
 
 type Props = {
   photos: PhotoView[]
+  /** Open photo in the lightbox, or -1 when closed. */
+  index: number
+  onIndexChange: (index: number) => void
+  /** Start the slideshow automatically when the lightbox opens. */
+  autoplay?: boolean
   /** Extra controls rendered over each photo (favorites, download…). */
   renderOverlay?: (photo: PhotoView) => ReactNode
   /** Extra button(s) for the lightbox toolbar, for the current photo. */
   renderToolbar?: (photo: PhotoView) => ReactNode
 }
 
-export function PhotoGrid({ photos, renderOverlay, renderToolbar }: Props) {
-  const [index, setIndex] = useState(-1)
+export function PhotoGrid({ photos, index, onIndexChange, autoplay = false, renderOverlay, renderToolbar }: Props) {
   const hasDownloads = photos.some((photo) => photo.download)
 
   return (
     <>
       <div className="masonry">
         {photos.map((photo, i) => (
-          <figure key={photo.id} className="group relative overflow-hidden bg-line/40">
-            <button
-              type="button"
-              onClick={() => setIndex(i)}
-              className="block w-full cursor-zoom-in"
-              aria-label={`Ver foto ${i + 1}`}
-            >
-              <Photo
-                photo={photo}
-                className="h-auto w-full transition duration-700 group-hover:scale-[1.02] group-hover:opacity-95"
-              />
+          <figure key={photo.id} id={`foto-${photo.id}`} className="group relative overflow-hidden bg-line/50">
+            <button type="button" onClick={() => onIndexChange(i)} className="block w-full cursor-zoom-in" aria-label={`Ver foto ${i + 1}`}>
+              <Photo photo={photo} sizes="(min-width: 1600px) 20vw, (min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw" className="h-auto w-full" />
             </button>
             {renderOverlay?.(photo)}
           </figure>
@@ -48,9 +45,10 @@ export function PhotoGrid({ photos, renderOverlay, renderToolbar }: Props) {
       <Lightbox
         open={index >= 0}
         index={index}
-        close={() => setIndex(-1)}
-        on={{ view: ({ index: current }) => setIndex(current) }}
-        plugins={[Counter, Fullscreen, Zoom, ...(hasDownloads ? [Download] : [])]}
+        close={() => onIndexChange(-1)}
+        on={{ view: ({ index: current }) => onIndexChange(current) }}
+        plugins={[Counter, Fullscreen, Slideshow, Zoom, ...(hasDownloads ? [Download] : [])]}
+        slideshow={{ autoplay, delay: 3500 }}
         slides={photos.map((photo) => ({
           src: photo.large,
           alt: photo.alt,
@@ -69,12 +67,12 @@ export function PhotoGrid({ photos, renderOverlay, renderToolbar }: Props) {
                 {renderToolbar(photos[index])}
               </div>
             ) : null,
+            'slideshow',
             ...(hasDownloads ? ['download'] : []),
             'fullscreen',
             'close',
           ].filter(Boolean),
         }}
-        styles={{ container: { backgroundColor: 'rgba(15, 14, 13, 0.97)' } }}
         controller={{ closeOnBackdropClick: true }}
       />
     </>

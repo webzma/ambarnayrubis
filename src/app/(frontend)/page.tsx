@@ -1,114 +1,105 @@
 import Link from 'next/link'
 
-import { AlbumCard } from '@/components/AlbumCard'
-import { HeroSlideshow } from '@/components/HeroSlideshow'
-import { Photo } from '@/components/Photo'
-import { SiteHeader } from '@/components/SiteHeader'
-import { asMedia, asMediaList, getAlbums, getSettings } from '@/lib/content'
-import { publicPhotoView } from '@/lib/photo-view'
+import { GalleryCard } from '@/components/GalleryCard'
+import { MailIcon } from '@/components/icons'
+import { Pagination } from '@/components/Pagination'
+import { SiteTopBar } from '@/components/SiteTopBar'
+import { asMedia, getSettings } from '@/lib/content'
+import { getGalleryTags, getListedGalleries } from '@/lib/galleries'
 
-export const revalidate = 3600
+type Props = { searchParams: Promise<{ pagina?: string; etiqueta?: string; q?: string }> }
 
-export default async function HomePage() {
-  const [settings, featured] = await Promise.all([getSettings(), getAlbums({ featured: true })])
-  const hero = asMediaList(settings.heroImages).map(publicPhotoView)
-  const aboutImage = asMedia(settings.aboutImage)
-  const ctaImage = hero[1] ?? hero[0]
+export default async function HomePage({ searchParams }: Props) {
+  const params = await searchParams
+  const tag = params.etiqueta?.trim() || undefined
+  const query = params.q?.trim().slice(0, 100) || undefined
+  const requestedPage = Math.max(1, Number.parseInt(params.pagina ?? '1', 10) || 1)
+
+  const [settings, tags, { cards, page, totalPages }] = await Promise.all([
+    getSettings(),
+    getGalleryTags(),
+    getListedGalleries({ page: requestedPage, tag, query }),
+  ])
+  const logo = asMedia(settings.logo)
+
+  // Builds a homepage URL keeping the current filters unless overridden (`null` clears one).
+  const href = (next: { pagina?: number; etiqueta?: string | null; q?: string | null }) => {
+    const search = new URLSearchParams()
+    const nextTag = next.etiqueta === undefined ? tag : next.etiqueta
+    const nextQuery = next.q === undefined ? query : next.q
+    if (nextTag) search.set('etiqueta', nextTag)
+    if (nextQuery) search.set('q', nextQuery)
+    if (next.pagina && next.pagina > 1) search.set('pagina', String(next.pagina))
+    const qs = search.toString()
+    return qs ? `/?${qs}` : '/'
+  }
+
+  const filter = (label: string, value: string | null) => {
+    const active = (tag ?? null) === value
+    return (
+      <Link
+        key={label}
+        href={href({ etiqueta: value })}
+        aria-current={active ? 'page' : undefined}
+        className={`label pb-1 transition-colors hover:text-ink ${active ? 'border-b border-ink text-ink' : ''}`}
+      >
+        {label}
+      </Link>
+    )
+  }
 
   return (
     <>
-      <section className="relative h-svh min-h-[600px] text-white">
-        <SiteHeader settings={settings} overlay />
-        <HeroSlideshow photos={hero} />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/60" />
-        <div className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center">
-          <p className="animate-rise flex items-center gap-4 text-[11px] tracking-[0.45em] uppercase before:h-px before:w-10 before:bg-white/60 after:h-px after:w-10 after:bg-white/60">
-            {settings.tagline}
-          </p>
-          <h1
-            className="animate-rise mt-6 font-serif text-6xl leading-none font-light md:text-8xl"
-            style={{ animationDelay: '150ms' }}
-          >
-            {settings.siteName}
-          </h1>
-          <div className="animate-rise mt-12 flex flex-wrap justify-center gap-3" style={{ animationDelay: '300ms' }}>
-            <Link href="/portafolio" className="btn btn-light">
-              Ver portafolio
-            </Link>
-            <Link href="/contacto" className="btn border-transparent text-white hover:bg-white/10 hover:text-white">
-              Reservar sesión →
-            </Link>
-          </div>
-        </div>
-        <a
-          href="#contenido"
-          className="absolute bottom-8 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-3 text-[10px] tracking-[0.3em] uppercase md:flex"
-          aria-label="Desplazarse al contenido"
-        >
-          <span>Descubre</span>
-          <span className="block h-12 w-px overflow-hidden bg-white/25">
-            <span className="animate-scroll-cue block h-full w-full bg-white" />
-          </span>
-        </a>
+      <SiteTopBar settings={settings} query={query} />
+
+      <section className="mx-auto max-w-2xl px-6 pt-6 text-center">
+        {logo?.url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={logo.sizes?.thumbnail?.url || logo.url}
+            alt={settings.siteName}
+            className="mx-auto h-[75px] w-[75px] rounded-md object-cover"
+          />
+        )}
+        <h1 className="heading mt-6 text-2xl tracking-[0.14em]">{settings.siteName}</h1>
+        {settings.intro && <p className="mt-8 text-[15px] leading-relaxed whitespace-pre-line">{settings.intro}</p>}
+        {settings.email && (
+          <a href={`mailto:${settings.email}`} className="mt-8 inline-flex items-center gap-3 text-[15px] hover:underline">
+            <MailIcon className="h-4 w-4 text-muted" />
+            {settings.email}
+          </a>
+        )}
+        <span className="mx-auto mt-12 block h-px w-32 bg-line" aria-hidden />
       </section>
 
-      <div id="contenido" />
+      <section className="mx-auto max-w-[1400px] px-4 pt-12 md:px-8">
+        {tags.length > 0 && (
+          <nav className="mb-16 flex flex-wrap justify-center gap-x-7 gap-y-3" aria-label="Filtrar por etiqueta">
+            {filter('Todas', null)}
+            {tags.map((name) => filter(name, name))}
+          </nav>
+        )}
 
-      {featured.length > 0 && (
-        <section className="reveal mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32">
-          <div className="mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="eyebrow-rule">Portafolio</p>
-              <h2 className="mt-4 font-serif text-4xl font-light md:text-6xl">Historias recientes</h2>
-            </div>
-            <Link href="/portafolio" className="link self-start text-[11px] tracking-[0.25em] uppercase md:self-auto">
-              Ver todo el portafolio →
+        {query && (
+          <p className="mb-12 text-center text-sm text-muted">
+            Resultados para «{query}» ·{' '}
+            <Link href={href({ q: null })} className="underline">
+              Ver todas
             </Link>
-          </div>
-          <div className="grid gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.slice(0, 6).map((album) => (
-              <AlbumCard key={album.id} album={album} />
+          </p>
+        )}
+
+        {cards.length === 0 ? (
+          <p className="py-16 text-center text-muted">{query || tag ? 'No hay galerías que coincidan.' : 'Pronto habrá nuevas galerías aquí.'}</p>
+        ) : (
+          <div className="grid gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+            {cards.map((gallery) => (
+              <GalleryCard key={gallery.id} gallery={gallery} />
             ))}
           </div>
-        </section>
-      )}
+        )}
 
-      <section className="bg-sand">
-        <div className="reveal mx-auto grid max-w-6xl items-center gap-14 px-6 py-24 md:grid-cols-2 md:gap-20 md:px-10 md:py-32">
-          {aboutImage && (
-            <div className="relative mr-4 mb-4 md:mr-0">
-              <div className="absolute inset-0 translate-x-4 translate-y-4 border border-accent/50" aria-hidden />
-              <Photo
-                photo={publicPhotoView(aboutImage)}
-                sizes="(min-width: 768px) 50vw, 100vw"
-                className="relative aspect-[4/5] w-full object-cover"
-              />
-            </div>
-          )}
-          <div className={aboutImage ? '' : 'mx-auto max-w-2xl text-center md:col-span-2'}>
-            <p className="eyebrow-rule">Sobre mí</p>
-            <h2 className="mt-4 font-serif text-4xl font-light md:text-6xl">{settings.aboutTitle}</h2>
-            {settings.aboutText && (
-              <p className="mt-8 line-clamp-6 text-lg leading-relaxed whitespace-pre-line text-muted">{settings.aboutText}</p>
-            )}
-            <Link href="/sobre-mi" className="btn mt-10">
-              Conóceme
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden bg-ink px-6 py-32 text-center text-white md:py-44">
-        {ctaImage && <Photo photo={ctaImage} sizes="100vw" className="absolute inset-0 h-full w-full object-cover opacity-25" />}
-        <div className="reveal relative">
-          <p className="text-[11px] tracking-[0.4em] text-white/70 uppercase">Reserva tu sesión</p>
-          <h2 className="mx-auto mt-6 max-w-3xl font-serif text-4xl leading-tight font-light italic md:text-6xl">
-            Cuéntame tu historia y creemos algo bonito juntos
-          </h2>
-          <Link href="/contacto" className="btn btn-light mt-12">
-            Escríbeme
-          </Link>
-        </div>
+        <Pagination page={page} totalPages={totalPages} href={(n) => href({ pagina: n })} />
       </section>
     </>
   )

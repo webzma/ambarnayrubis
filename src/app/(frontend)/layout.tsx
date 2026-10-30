@@ -1,40 +1,32 @@
 import type { Metadata } from 'next'
-import { Cormorant_Garamond, Jost } from 'next/font/google'
+import { Lato, Raleway } from 'next/font/google'
 import React from 'react'
 
-import { SiteFooter, whatsappHref } from '@/components/SiteFooter'
-import { WhatsAppButton } from '@/components/WhatsAppButton'
+import { SiteFooter } from '@/components/SiteFooter'
 import { getSettings } from '@/lib/content'
 import './styles.css'
 
-const display = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['300', '400', '500'],
-  style: ['normal', 'italic'],
-  variable: '--font-display',
-})
-const body = Jost({ subsets: ['latin'], weight: ['300', '400', '500'], variable: '--font-body' })
+const heading = Raleway({ subsets: ['latin'], weight: ['300', '400', '500', '600'], variable: '--font-heading' })
+const body = Lato({ subsets: ['latin'], weight: ['300', '400', '700'], variable: '--font-body' })
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings()
   return {
     metadataBase: process.env.NEXT_PUBLIC_SERVER_URL ? new URL(process.env.NEXT_PUBLIC_SERVER_URL) : undefined,
     title: { default: `${settings.siteName} | ${settings.tagline ?? 'Fotografía'}`, template: `%s | ${settings.siteName}` },
-    description: settings.description ?? undefined,
+    description: settings.description ?? settings.intro ?? undefined,
     openGraph: { siteName: settings.siteName, type: 'website' },
   }
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSettings()
-  const whatsapp = whatsappHref(settings.whatsapp)
 
   return (
-    <html lang="es" className={`${display.variable} ${body.variable}`}>
+    <html lang="es" className={`${heading.variable} ${body.variable}`}>
       <body className="flex min-h-screen flex-col">
         <main className="flex-1">{children}</main>
         <SiteFooter settings={settings} />
-        {whatsapp && <WhatsAppButton href={whatsapp} />}
       </body>
     </html>
   )

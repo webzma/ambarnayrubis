@@ -10,7 +10,7 @@ export const Galleries: CollectionConfig = {
   admin: {
     group: 'Clientes',
     useAsTitle: 'title',
-    defaultColumns: ['title', 'clientName', 'eventDate', 'status', 'expiresAt'],
+    defaultColumns: ['title', 'clientName', 'eventDate', 'listed', 'status'],
     preview: (doc) => (doc?.slug ? `/g/${doc.slug}` : null),
   },
   access: {
@@ -61,6 +61,23 @@ export const Galleries: CollectionConfig = {
       relationTo: 'client-photos',
       hasMany: true,
       admin: { description: 'Arrastra todas las fotos de la sesión para subirlas en lote.' },
+    },
+    {
+      name: 'tags',
+      label: 'Etiquetas',
+      type: 'text',
+      hasMany: true,
+      admin: { description: 'Ej. Vintaje. Se muestran como filtros en la página principal.' },
+    },
+    {
+      name: 'listed',
+      label: 'Mostrar en la página principal',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Si tiene contraseña, se verá la portada con un candado y las fotos seguirán protegidas.',
+      },
     },
     {
       name: 'status',

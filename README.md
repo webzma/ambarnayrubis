@@ -1,21 +1,21 @@
 # Ambar Nayrubis — Sitio de fotografía
 
-Portafolio público y galerías privadas para clientes, con favoritos y descargas.
+Página de galerías al estilo Pixieset: perfil de la fotógrafa y galerías de clientes con contraseña opcional, favoritos, descargas y presentación.
 Hecho con **Next.js 16 + Payload CMS 3**, **PostgreSQL (Neon)**, **Cloudflare R2** y desplegado en **Vercel**.
 
 ## Funcionalidades
 
 | Área | Qué incluye |
 |---|---|
-| Sitio público | Inicio con carrusel a pantalla completa, portafolio por álbumes (masonry + lightbox con zoom), Sobre mí, Contacto |
-| Galerías de clientes (`/g/<código>`) | Contraseña opcional, fecha de expiración, favoritos guardados por email, descarga individual, ZIP de todo o solo de las favoritas |
+| Inicio (`/`) | Foto de perfil, nombre, presentación, email y redes; buscador; filtro por etiquetas; galerías con portada, fecha y candado si tienen contraseña; paginación (9 por página) |
+| Galerías (`/g/<código>`) | Portada a pantalla completa, contraseña opcional, fecha de expiración, favoritos guardados por email, descarga individual, ZIP de todo o solo de las favoritas, compartir galería o foto, presentación automática |
 | Acceso de clientes (`/clientes`) | El cliente escribe código + contraseña |
-| Panel `/admin` (en español) | Álbumes, fotos, galerías, selecciones de favoritos de cada cliente, consultas del formulario y ajustes del sitio |
-| Email | Aviso de cada consulta nueva vía Resend |
+| Panel `/admin` (en español) | Galerías, fotos, selecciones de favoritos de cada cliente y ajustes del sitio |
+| Email | Recuperación de contraseña del panel vía Resend (opcional) |
 
 ### Cómo están protegidas las fotos
 
-- **Portafolio** → bucket R2 **público**. Las imágenes se sirven directamente desde R2/CDN (Vercel no paga ancho de banda).
+- **Foto de perfil** → bucket R2 **público**. Se sirve directamente desde R2/CDN (Vercel no paga ancho de banda).
 - **Clientes** → bucket R2 **privado**. Al desbloquear la galería se firma una cookie (HMAC) y la página genera URLs prefirmadas de R2 válidas unas horas. La API `/api/client-photos` solo responde a administradores.
 - Si cambias la contraseña de una galería, se invalidan todos los accesos anteriores.
 - Las subidas van **del navegador directo a R2** (`clientUploads`), así que no aplica el límite de 4.5 MB por petición de Vercel.
@@ -75,7 +75,7 @@ Haz commit de la migración. En Vercel se aplica sola antes de cada build (`pnpm
 
 ### 3. Email — Resend (opcional)
 
-Crea una cuenta en [resend.com](https://resend.com), verifica tu dominio y copia la API key en `RESEND_API_KEY`.
+Solo se usa para que el panel pueda enviar el email de "olvidé mi contraseña". Crea una cuenta en [resend.com](https://resend.com), verifica tu dominio y copia la API key en `RESEND_API_KEY`.
 
 ### 4. Vercel
 
@@ -87,11 +87,11 @@ Crea una cuenta en [resend.com](https://resend.com), verifica tu dominio y copia
 
 ## Uso del panel (para la fotógrafa)
 
-1. **Ajustes del sitio**: nombre, frase, fotos de portada, texto "Sobre mí", email y redes.
-2. **Portafolio → Álbumes**: crea un álbum, arrastra todas las fotos de golpe, elige la portada y marca "Destacado en inicio" si quieres que salga en la portada.
-3. **Clientes → Galerías**: crea la galería, sube las fotos y pon una contraseña. Comparte con el cliente el enlace `https://tudominio.com/g/<slug>` y la contraseña.
-4. **Clientes → Selecciones de favoritos**: aquí verás qué fotos eligió cada cliente.
-5. **Clientes → Consultas**: mensajes del formulario de contacto.
+1. **Configuración → Ajustes del sitio**: nombre, foto de perfil, presentación, email y redes sociales.
+2. **Clientes → Galerías**: crea la galería, sube las fotos, elige la portada y la fecha. Opcional: contraseña, etiquetas (aparecen como filtros en el inicio) y fecha de expiración.
+   - **Mostrar en la página principal** (activado por defecto): desmárcalo para que la galería solo sea accesible con el enlace.
+   - Comparte con el cliente el enlace `https://tudominio.com/g/<slug>` y, si tiene, la contraseña.
+3. **Clientes → Selecciones de favoritos**: aquí verás qué fotos eligió cada cliente.
 
 ## Costos estimados (mensuales)
 
@@ -108,9 +108,9 @@ Crea una cuenta en [resend.com](https://resend.com), verifica tu dominio y copia
 src/
   app/(frontend)/          sitio público, galerías y rutas de descarga/favoritos
   app/(payload)/           panel /admin y API REST (generado por Payload)
-  collections/             Albums, Media, Galleries, ClientPhotos, Selections, Inquiries, Users
+  collections/             Galleries, ClientPhotos, Selections, Media, Users
   globals/SiteSettings.ts  ajustes editables del sitio
-  lib/                     R2, URLs firmadas, acceso a galerías, consultas
+  lib/                     R2, URLs firmadas, acceso y listado de galerías
   components/              UI (grid, lightbox, formularios…)
   migrations/              migraciones de Postgres
 ```
