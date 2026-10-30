@@ -43,31 +43,6 @@
   }
 }
 
-/* Gallery masonry via CSS columns: keeps each photo's natural aspect ratio. */
-.masonry {
-  column-gap: 6px;
-  columns: 2;
-}
-@media (min-width: 768px) {
-  .masonry {
-    columns: 3;
-  }
-}
-@media (min-width: 1280px) {
-  .masonry {
-    columns: 4;
-  }
-}
-@media (min-width: 1600px) {
-  .masonry {
-    columns: 5;
-  }
-}
-.masonry > * {
-  break-inside: avoid;
-  margin-bottom: 6px;
-}
-
 /* Light lightbox, like the rest of the gallery. */
 .yarl__root {
   --yarl__color_backdrop: rgba(255, 255, 255, 0.98);

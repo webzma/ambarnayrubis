@@ -209,7 +209,7 @@ export function GalleryView({ slug, title, siteName, photos, allowDownloads, all
 
       {error && <p className="py-2 text-center text-sm text-red-700">{error}</p>}
 
-      <div className="px-1.5 pt-1.5 md:px-4">
+      <div className="px-1.5 pt-1.5">
         {visible.length === 0 ? (
           <p className="py-24 text-center text-muted">Aún no has marcado ninguna foto como favorita.</p>
         ) : (
