@@ -6,7 +6,7 @@ import { SiteFooter } from '@/components/SiteFooter'
 import { getSettings } from '@/lib/content'
 import './styles.css'
 
-const heading = Raleway({ subsets: ['latin'], weight: ['300', '400', '500', '600'], variable: '--font-heading' })
+const heading = Raleway({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'], variable: '--font-heading' })
 const body = Lato({ subsets: ['latin'], weight: ['300', '400', '700'], variable: '--font-body' })
 
 export async function generateMetadata(): Promise<Metadata> {

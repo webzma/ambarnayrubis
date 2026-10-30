@@ -61,7 +61,7 @@ export default async function HomePage({ searchParams }: Props) {
             className="mx-auto h-[75px] w-[75px] rounded-md object-cover"
           />
         )}
-        <h1 className="heading mt-6 text-2xl tracking-[0.14em]">{settings.siteName}</h1>
+        <h1 className="heading mt-6 text-2xl font-bold tracking-[0.14em]">{settings.siteName}</h1>
         {settings.intro && <p className="mt-8 text-[15px] leading-relaxed whitespace-pre-line">{settings.intro}</p>}
         {settings.email && (
           <a href={`mailto:${settings.email}`} className="mt-8 inline-flex items-center gap-3 text-[15px] hover:underline">
