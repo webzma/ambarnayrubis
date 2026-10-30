@@ -24,6 +24,10 @@ export const r2ClientConfig: S3ClientConfig = {
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
   },
   forcePathStyle: true,
+  // Recent AWS SDKs add CRC32 checksums by default (even to presigned URLs), which R2 doesn't
+  // fully support. Cloudflare recommends only sending them when an operation requires it.
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
 }
 
 export const R2_PUBLIC_BUCKET = process.env.R2_PUBLIC_BUCKET || ''
