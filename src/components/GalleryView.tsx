@@ -148,10 +148,10 @@ export function GalleryView({ slug, title, siteName, photos, allowDownloads, all
 
   return (
     <div>
-      <div className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/95 px-4 py-3 backdrop-blur md:px-6">
+      <div className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/95 px-4 py-4 backdrop-blur md:px-6">
         <div className="min-w-0">
-          <p className="truncate font-display text-lg tracking-wide">{title}</p>
-          <p className="text-[10px] tracking-[0.2em] text-muted uppercase">{siteName}</p>
+          <p className="truncate font-display text-2xl tracking-wide md:text-[28px]">{title}</p>
+          <p className="mt-0.5 text-xs tracking-[0.2em] md:text-[13px] text-muted uppercase">{siteName}</p>
         </div>
         <div className="flex shrink-0 items-center">
           {allowFavorites && (
