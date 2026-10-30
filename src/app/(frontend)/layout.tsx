@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { Cormorant_Garamond, Jost } from 'next/font/google'
 import React from 'react'
 
-import { SiteFooter } from '@/components/SiteFooter'
+import { SiteFooter, whatsappHref } from '@/components/SiteFooter'
+import { WhatsAppButton } from '@/components/WhatsAppButton'
 import { getSettings } from '@/lib/content'
 import './styles.css'
 
@@ -26,12 +27,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const settings = await getSettings()
+  const whatsapp = whatsappHref(settings.whatsapp)
 
   return (
     <html lang="es" className={`${display.variable} ${body.variable}`}>
       <body className="flex min-h-screen flex-col">
         <main className="flex-1">{children}</main>
         <SiteFooter settings={settings} />
+        {whatsapp && <WhatsAppButton href={whatsapp} />}
       </body>
     </html>
   )

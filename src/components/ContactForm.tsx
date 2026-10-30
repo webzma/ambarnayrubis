@@ -13,15 +13,20 @@ export function ContactForm() {
 
   if (state.ok) {
     return (
-      <div className="py-16 text-center">
-        <p className="font-serif text-3xl">¡Gracias por escribir!</p>
+      <div className="animate-rise flex flex-col items-center border border-line px-8 py-20 text-center">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-sand text-accent" aria-hidden>
+          <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.5}>
+            <path d="m5 12.5 4.5 4.5L19 7.5" />
+          </svg>
+        </span>
+        <p className="mt-8 font-serif text-4xl font-light">¡Gracias por escribir!</p>
         <p className="mt-4 text-muted">Te responderé lo antes posible.</p>
       </div>
     )
   }
 
   return (
-    <form action={action} key={JSON.stringify(v)} className="grid gap-8 md:grid-cols-2">
+    <form action={action} key={JSON.stringify(v)} className="grid gap-x-10 gap-y-9 md:grid-cols-2">
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
       <label className="block">
         <span className="eyebrow">Nombre *</span>
@@ -52,11 +57,11 @@ export function ContactForm() {
       </label>
       <label className="block md:col-span-2">
         <span className="eyebrow">Cuéntame tu idea *</span>
-        <textarea name="message" defaultValue={v.message} required rows={5} className="field resize-none" />
+        <textarea name="message" defaultValue={v.message} required rows={5} className="field resize-none" placeholder="Lugar, número de personas, estilo que te gusta…" />
       </label>
-      <div className="md:col-span-2 flex flex-col items-center gap-4">
+      <div className="flex flex-col items-start gap-4 md:col-span-2">
         {state.error && <p className="text-sm text-red-700">{state.error}</p>}
-        <button type="submit" className="btn" disabled={pending}>
+        <button type="submit" className="btn btn-solid w-full sm:w-auto" disabled={pending}>
           {pending ? 'Enviando…' : 'Enviar mensaje'}
         </button>
       </div>

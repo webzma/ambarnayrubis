@@ -17,7 +17,7 @@ export function GalleryAccessForm({ slug }: Props) {
   )
 
   return (
-    <form action={action} className="mx-auto flex w-full max-w-sm flex-col gap-8">
+    <form action={action} className="mx-auto flex w-full max-w-sm flex-col gap-8 text-left">
       {slug ? (
         <input type="hidden" name="slug" value={slug} />
       ) : (
@@ -31,7 +31,7 @@ export function GalleryAccessForm({ slug }: Props) {
         <input name="password" type="password" className="field" autoComplete="current-password" required={Boolean(slug)} />
       </label>
       {state.error && <p className="text-center text-sm text-red-700">{state.error}</p>}
-      <button type="submit" className="btn" disabled={pending}>
+      <button type="submit" className="btn btn-solid" disabled={pending}>
         {pending ? 'Verificando…' : 'Ver galería'}
       </button>
     </form>

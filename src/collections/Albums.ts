@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated, publishedOrAuthenticated } from '@/access'
 import { slugField } from '@/fields/slug'
+import { albumCategories } from '@/lib/categories'
 import { revalidateAfterChange, revalidateSite } from '@/hooks/revalidateSite'
 
 export const Albums: CollectionConfig = {
@@ -30,14 +31,7 @@ export const Albums: CollectionConfig = {
       name: 'category',
       label: 'Categoría',
       type: 'select',
-      options: [
-        { label: 'Bodas', value: 'bodas' },
-        { label: 'Retratos', value: 'retratos' },
-        { label: 'Familias', value: 'familias' },
-        { label: 'Eventos', value: 'eventos' },
-        { label: 'Maternidad', value: 'maternidad' },
-        { label: 'Comercial', value: 'comercial' },
-      ],
+      options: albumCategories,
     },
     { name: 'description', label: 'Descripción', type: 'textarea' },
     {
