@@ -1,12 +1,35 @@
 @import 'tailwindcss';
 
+/* `dark:` targets the theme chosen by the inline script in the root layout, not the OS setting. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
 @theme {
   --font-display: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --color-ink: #2a2a2a;
-  --color-muted: #7a7a7a;
-  --color-paper: #ffffff;
-  --color-line: #e6e6e6;
+}
+
+/* Colors are runtime variables so they can switch with the theme. */
+@theme inline {
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-paper: var(--paper);
+  --color-line: var(--line);
+}
+
+:root {
+  --ink: #2a2a2a;
+  --muted: #7a7a7a;
+  --paper: #ffffff;
+  --line: #e6e6e6;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --ink: #e8e6e3;
+  --muted: #9a9894;
+  --paper: #141414;
+  --line: #2c2c2c;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -51,22 +74,121 @@
   --yarl__button_filter: none;
   --yarl__counter_filter: none;
 }
+[data-theme='dark'] .yarl__root {
+  --yarl__color_backdrop: rgba(20, 20, 20, 0.98);
+  --yarl__color_button: rgba(232, 230, 227, 0.75);
+  --yarl__color_button_active: #e8e6e3;
+}
+
+/* ── Motion: a photographic vocabulary (developing, focusing, aperture) ───────────── */
+
+:root {
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
 
 @keyframes fade-in {
   from {
     opacity: 0;
   }
-  to {
-    opacity: 1;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
   }
 }
+/* Comes into focus: blurred with open letter spacing, settling to the element's own values. */
+@keyframes focus-in {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    letter-spacing: 0.45em;
+  }
+}
+@keyframes draw-line {
+  from {
+    transform: scaleX(0);
+  }
+}
+/* A shutter/iris opening from the centre. */
+@keyframes aperture {
+  from {
+    clip-path: circle(0% at 50% 50%);
+  }
+  to {
+    clip-path: circle(75% at 50% 50%);
+  }
+}
+@keyframes ken-burns {
+  from {
+    transform: scale(1.12);
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 1s ease both;
 }
+.animate-rise {
+  animation: rise 1s var(--ease-soft) both;
+}
+.animate-focus {
+  animation: focus-in 1.6s var(--ease-soft) both;
+}
+.animate-draw {
+  animation: draw-line 1.2s var(--ease-soft) both;
+}
+.animate-aperture {
+  animation: aperture 1.6s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+.animate-ken-burns {
+  animation: ken-burns 9s ease-out both;
+}
+
+/* "Developing" a print: each photo resolves from soft, desaturated and faint once loaded. */
+.reveal-img {
+  opacity: 0;
+  filter: blur(14px) grayscale(0.8) brightness(1.1);
+  transform: scale(1.03);
+  transition:
+    opacity 0.9s ease,
+    filter 1.6s var(--ease-soft),
+    transform 1.6s var(--ease-soft),
+    scale 1.4s var(--ease-soft);
+}
+.reveal-img[data-loaded] {
+  opacity: 1;
+  filter: none;
+  transform: none;
+}
+/* Cover photos keep their slow Ken Burns zoom on top of the develop effect. */
+.reveal-img.ken-burns[data-loaded] {
+  animation: ken-burns 9s ease-out both;
+}
+
+/* Cards drift up as they scroll into view (browsers with scroll-driven animations). */
+@supports (animation-timeline: view()) {
+  .reveal-on-scroll {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 45%;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-fade-in {
-    animation: none;
+  .animate-fade-in,
+  .animate-rise,
+  .animate-focus,
+  .animate-draw,
+  .animate-aperture,
+  .animate-ken-burns,
+  .reveal-on-scroll,
+  .reveal-img.ken-burns[data-loaded] {
+    animation: none !important;
+  }
+  .reveal-img {
+    filter: none;
+    transform: none;
+    transition: opacity 0.4s ease;
   }
   html {
     scroll-behavior: auto;

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import type { SiteSetting } from '@/payload-types'
 import { SearchToggle } from './SearchToggle'
 import { SocialLinks } from './SocialLinks'
+import { ThemeToggle } from './ThemeToggle'
 
 /** Thin top bar: social links on the left, gallery search on the right. */
 export function SiteTopBar({ settings, query }: { settings: SiteSetting; query?: string }) {
@@ -17,7 +18,10 @@ export function SiteTopBar({ settings, query }: { settings: SiteSetting; query?:
           {settings.siteName}
         </Link>
       )}
-      <SearchToggle initial={query} />
+      <div className="flex items-center">
+        <SearchToggle initial={query} />
+        <ThemeToggle />
+      </div>
     </header>
   )
 }

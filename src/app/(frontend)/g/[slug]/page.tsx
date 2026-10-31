@@ -27,18 +27,50 @@ export default async function ClientGalleryPage({ params }: Props) {
   const logo = asMedia(settings.logo)
 
   const hero = (children?: React.ReactNode) => (
-    <section className="relative flex h-svh min-h-[560px] flex-col items-center justify-center overflow-hidden bg-ink text-white">
-      {cover && <Photo photo={cover} sizes="100vw" priority className="absolute inset-0 h-full w-full object-cover" />}
+    <section className="animate-aperture relative flex h-svh min-h-[560px] flex-col items-center justify-center overflow-hidden bg-neutral-950 text-white">
+      {cover && (
+        <Photo
+          photo={cover}
+          sizes="100vw"
+          priority
+          className="ken-burns absolute inset-0 h-full w-full object-cover"
+        />
+      )}
       <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/55" />
-      <div className="animate-fade-in relative z-10 flex flex-col items-center px-6 text-center">
-        <h1 className="font-display text-5xl font-light tracking-wide md:text-7xl">{gallery.title}</h1>
-        {date && <p className="mt-5 text-xs tracking-[0.3em] uppercase md:text-sm">{date}</p>}
-        {children}
+      <div className="relative z-10 flex flex-col items-center px-6 text-center">
+        <h1
+          className="animate-focus font-display text-5xl font-light tracking-wide md:text-7xl"
+          style={{ animationDelay: '500ms' }}
+        >
+          {gallery.title}
+        </h1>
+        {date && (
+          <p
+            className="animate-rise mt-5 text-xs tracking-[0.3em] uppercase md:text-sm"
+            style={{ animationDelay: '900ms' }}
+          >
+            {date}
+          </p>
+        )}
+        <div
+          className="animate-rise flex w-full flex-col items-center"
+          style={{ animationDelay: '1100ms' }}
+        >
+          {children}
+        </div>
       </div>
-      <Link href="/" className="absolute bottom-8 z-10 flex flex-col items-center gap-2">
+      <Link
+        href="/"
+        className="animate-fade-in absolute bottom-8 z-10 flex flex-col items-center gap-2"
+        style={{ animationDelay: '1400ms' }}
+      >
         {logo?.url && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={logo.sizes?.thumbnail?.url || logo.url} alt="" className="h-12 w-12 rounded-md object-cover" />
+          <img
+            src={logo.sizes?.thumbnail?.url || logo.url}
+            alt=""
+            className="h-12 w-12 rounded-md object-cover"
+          />
         )}
         <span className="text-[10px] tracking-[0.25em] uppercase">{settings.siteName}</span>
       </Link>
@@ -46,7 +78,11 @@ export default async function ClientGalleryPage({ params }: Props) {
   )
 
   if (isExpired(gallery)) {
-    return hero(<p className="mt-10 text-white/85">Esta galería ha expirado. Escríbeme si necesitas acceso.</p>)
+    return hero(
+      <p className="mt-10 text-white/85">
+        Esta galería ha expirado. Escríbeme si necesitas acceso.
+      </p>,
+    )
   }
 
   if (!(await hasGalleryAccess(gallery))) {
@@ -58,7 +94,9 @@ export default async function ClientGalleryPage({ params }: Props) {
   }
 
   const photos = await Promise.all(
-    gallery.photos.map((photo) => privatePhotoView(photo, { allowDownload: gallery.allowDownloads })),
+    gallery.photos.map((photo) =>
+      privatePhotoView(photo, { allowDownload: gallery.allowDownloads }),
+    ),
   )
 
   return (

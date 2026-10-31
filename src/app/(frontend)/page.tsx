@@ -58,23 +58,47 @@ export default async function HomePage({ searchParams }: Props) {
           <img
             src={logo.sizes?.thumbnail?.url || logo.url}
             alt={settings.siteName}
-            className="mx-auto h-[75px] w-[75px] rounded-md object-cover"
+            className="animate-rise mx-auto h-[75px] w-[75px] rounded-md object-cover"
           />
         )}
-        <h1 className="heading mt-6 text-2xl font-bold tracking-[0.14em]">{settings.siteName}</h1>
-        {settings.intro && <p className="mt-8 text-[15px] leading-relaxed whitespace-pre-line">{settings.intro}</p>}
+        <h1
+          className="heading animate-focus mt-6 text-2xl font-bold tracking-[0.14em]"
+          style={{ animationDelay: '150ms' }}
+        >
+          {settings.siteName}
+        </h1>
+        {settings.intro && (
+          <p
+            style={{ animationDelay: '400ms' }}
+            className="animate-rise mt-8 text-[15px] leading-relaxed whitespace-pre-line"
+          >
+            {settings.intro}
+          </p>
+        )}
         {settings.email && (
-          <a href={`mailto:${settings.email}`} className="mt-8 inline-flex items-center gap-3 text-[15px] hover:underline">
+          <a
+            href={`mailto:${settings.email}`}
+            style={{ animationDelay: '500ms' }}
+            className="animate-rise mt-8 inline-flex items-center gap-3 text-[15px] hover:underline"
+          >
             <MailIcon className="h-4 w-4 text-muted" />
             {settings.email}
           </a>
         )}
-        <span className="mx-auto mt-12 block h-px w-32 bg-line" aria-hidden />
+        <span
+          className="animate-draw mx-auto mt-12 block h-px w-32 bg-line"
+          style={{ animationDelay: '650ms' }}
+          aria-hidden
+        />
       </section>
 
       <section className="mx-auto max-w-[1400px] px-4 pt-12 md:px-8">
         {tags.length > 0 && (
-          <nav className="mb-16 flex flex-wrap justify-center gap-x-7 gap-y-3" aria-label="Filtrar por etiqueta">
+          <nav
+            style={{ animationDelay: '800ms' }}
+            className="animate-fade-in mb-16 flex flex-wrap justify-center gap-x-7 gap-y-3"
+            aria-label="Filtrar por etiqueta"
+          >
             {filter('Todas', null)}
             {tags.map((name) => filter(name, name))}
           </nav>
@@ -90,11 +114,15 @@ export default async function HomePage({ searchParams }: Props) {
         )}
 
         {cards.length === 0 ? (
-          <p className="py-16 text-center text-muted">{query || tag ? 'No hay galerías que coincidan.' : 'Pronto habrá nuevas galerías aquí.'}</p>
+          <p className="py-16 text-center text-muted">
+            {query || tag ? 'No hay galerías que coincidan.' : 'Pronto habrá nuevas galerías aquí.'}
+          </p>
         ) : (
           <div className="grid gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((gallery) => (
-              <GalleryCard key={gallery.id} gallery={gallery} />
+              <div key={gallery.id} className="reveal-on-scroll">
+                <GalleryCard gallery={gallery} />
+              </div>
             ))}
           </div>
         )}

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PhotoView } from '@/lib/photo-view'
 import { DownloadIcon, HeartIcon, PlayIcon, ShareIcon } from './icons'
 import { PhotoGrid } from './PhotoGrid'
+import { ThemeToggle } from './ThemeToggle'
 
 type Props = {
   slug: string
@@ -148,7 +149,7 @@ export function GalleryView({ slug, title, siteName, photos, allowDownloads, all
 
   return (
     <div>
-      <div className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/95 px-4 py-4 backdrop-blur md:px-6">
+      <div className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-paper/95 px-4 py-4 backdrop-blur md:px-6">
         <div className="min-w-0">
           <p className="truncate font-display text-2xl tracking-wide md:text-[28px]">{title}</p>
           <p className="mt-0.5 text-xs tracking-[0.2em] md:text-[13px] text-muted uppercase">{siteName}</p>
@@ -165,7 +166,7 @@ export function GalleryView({ slug, title, siteName, photos, allowDownloads, all
             >
               <HeartIcon filled={onlyFavorites} />
               {favorites.size > 0 && (
-                <span className="absolute top-1 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[9px] text-white">
+                <span className="absolute top-1 right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-ink px-1 text-[9px] text-paper">
                   {favorites.size}
                 </span>
               )}
@@ -183,7 +184,7 @@ export function GalleryView({ slug, title, siteName, photos, allowDownloads, all
                 </a>
               )}
               {downloadMenu && canDownloadFavorites && (
-                <div className="absolute right-0 mt-2 w-56 border border-line bg-white py-2 text-sm shadow-lg" onMouseLeave={() => setDownloadMenu(false)}>
+                <div className="absolute right-0 mt-2 w-56 border border-line bg-paper py-2 text-sm shadow-lg" onMouseLeave={() => setDownloadMenu(false)}>
                   <a href={`/g/${slug}/descargar`} className="block px-4 py-2 hover:bg-line/50" onClick={() => setDownloadMenu(false)}>
                     Todas las fotos ({photos.length})
                   </a>
@@ -204,6 +205,7 @@ export function GalleryView({ slug, title, siteName, photos, allowDownloads, all
           <button type="button" onClick={startSlideshow} className="icon-btn" aria-label="Ver presentación" title="Presentación">
             <PlayIcon />
           </button>
+          <ThemeToggle />
         </div>
       </div>
 
@@ -272,7 +274,7 @@ export function GalleryView({ slug, title, siteName, photos, allowDownloads, all
 
       {askEmailFor !== null && (
         <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50 p-6" onClick={() => setAskEmailFor(null)}>
-          <form action={submitEmail} onClick={(event) => event.stopPropagation()} className="w-full max-w-sm bg-white p-8 text-center shadow-2xl">
+          <form action={submitEmail} onClick={(event) => event.stopPropagation()} className="w-full max-w-sm bg-paper p-8 text-center shadow-2xl">
             <p className="heading text-base">Guarda tus favoritas</p>
             <p className="mt-3 text-sm text-muted">Escribe tu email para guardar tu selección y verla desde cualquier dispositivo.</p>
             <input name="email" type="email" required autoFocus placeholder="tu@email.com" className="field mt-6 text-center" />
@@ -285,7 +287,7 @@ export function GalleryView({ slug, title, siteName, photos, allowDownloads, all
 
       <div
         role="status"
-        className={`fixed bottom-6 left-1/2 z-[10001] -translate-x-1/2 bg-ink px-5 py-2.5 text-sm text-white transition-opacity duration-300 ${toast ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+        className={`fixed bottom-6 left-1/2 z-[10001] -translate-x-1/2 bg-ink px-5 py-2.5 text-sm text-paper transition-opacity duration-300 ${toast ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
       >
         {toast}
       </div>

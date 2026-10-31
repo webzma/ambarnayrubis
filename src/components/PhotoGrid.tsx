@@ -93,6 +93,7 @@ export function PhotoGrid({ photos, index, onIndexChange, autoplay = false, rend
         on={{ view: ({ index: current }) => onIndexChange(current) }}
         plugins={[Counter, Fullscreen, Slideshow, Zoom, ...(hasDownloads ? [Download] : [])]}
         slideshow={{ autoplay, delay: 3500 }}
+        animation={{ fade: 450, swipe: 550 }}
         slides={photos.map((photo) => ({
           src: photo.large,
           alt: photo.alt,
