@@ -2,3 +2,6 @@
   # Not secrets: Next.js inlines NEXT_PUBLIC_* values into the build output by design,
   # and bucket names are documented in the README and visible in public file URLs.
   SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SERVER_URL,R2_PUBLIC_BUCKET,R2_PRIVATE_BUCKET"
+  # Turbopack's persistent build cache stores the build-time env (incl. R2 credentials).
+  # It stays on the build machine and is never deployed, so don't scan it.
+  SECRETS_SCAN_OMIT_PATHS = ".next/cache/**"
