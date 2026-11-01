@@ -1,0 +1,3 @@
+[build.environment]
+  # Public site URL: Next.js inlines NEXT_PUBLIC_* values into the build output by design.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SERVER_URL"
